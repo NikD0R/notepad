@@ -1,5 +1,13 @@
 class Post
 
+  def self.post_types  # def self.имя_метода - объявление статического метода
+    [Memo, Link, Task]
+  end
+
+  def self.create(type_index)
+    return  post_types[type_index].new
+  end
+
   def initialize
     @created_at = Time.now
     @text = nil
@@ -31,3 +39,7 @@ class Post
     return current_path + "/" + file_name
   end
 end
+
+# PS: Весь набор методов, объявленных в родительском классе называется интерфейсом класса
+# Дети могут по–разному реализовывать методы, но они должны подчиняться общей идее
+# и набору функций, которые заявлены в базовом (родительском классе)
