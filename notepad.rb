@@ -16,6 +16,7 @@ require_relative 'link'
 puts "Привет, я твой блокнот! Версия 2 + Sqlite"
 puts "Что хотите записать в блокнот?"
 
+# массив возможных видов Записи (поста)
 choices = Post.post_types.keys
 
 choice = -1

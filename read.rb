@@ -14,11 +14,13 @@ require_relative 'link'
 
 # id, limit, type
 
-
+# будем обрабатывать параметры командной строки по-взрослому с помощью спец. библиотеки руби
 require 'optparse'
 
+# Все наши опции будут записаны сюда
 options = {}
 
+# заведем нужные нам опции
 OptionParser.new do |opt|
   opt.banner = 'Usage: read.rb [options]'
 
@@ -33,8 +35,15 @@ OptionParser.new do |opt|
 
 end.parse!
 
-result = Post.find(options[:limit], options[:type], options[:id])
+result = if options[:id].nil?
+           # Если id не передали, ищем все записи по параметрам
+           Post.find_all(options[:limit], options[:type])
+         else
+           # Если передали — забиваем на остальные параметры и ищем по id
+           Post.find_by_id(options[:id])
+         end
 
+# показываем конкретный пост
 if result.is_a? Post # показываем конкретный пост
   puts "Запись #{result.class.name}, id = #{options[:id]}"
   # выведем весь пост на экран и закроемся
@@ -44,17 +53,30 @@ if result.is_a? Post # показываем конкретный пост
 
 else # покажем таблицу результатов
 
-  print "| id\t| @type\t|  @created_at\t\t\t|  @text \t\t\t| @url\t\t| @due_date \t "
+
+  print '| id                 '
+  print '| @type              '
+  print '| @created_at        '
+  print '| @text              '
+  print '| @url               '
+  print '| @due_date          '
+  print '|'
+
 
   result.each do |row|
     puts
     # puts '_'*80
     row.each do |element|
-      print "|  #{element.to_s.delete("\\n\\r")[0..40]}\t"
+      element_text = "| #{element.to_s.delete("\n\r")[0..40]}"
+      print element_text
     end
 
+    print "|"
   end
 
+  puts
 end
 
-puts
+
+# Фигурные скобки {...} после вызова метода в простых случаях аналогичны конструкции do ... end
+# Они ограничивают блок кода который будет выполняться этим методом
