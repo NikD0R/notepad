@@ -30,7 +30,7 @@ class Post
       result = db.execute("SELECT * FROM posts WHERE  rowid = ?", id)
 
       db.close
-    
+
       # Если в результате запроса получили пустой массис, снова возвращаем nil
       return nil if result.empty?
 
@@ -64,7 +64,12 @@ class Post
     query += "LIMIT :limit " unless limit.nil? # если задан лимит, надо добавить условие
 
     # готовим запрос в базу, как плов :)
+    begin
     statement = db.prepare query
+    rescue SQLite3::SQLException => e
+      puts "Не удалось выполнить запрос в базе #{@@SQLITE_DB_FILE}"
+      abort e.message
+    end
 
     statement.bind_param('type', type) unless type.nil? # загружаем в запрос тип вместо плейсхолдера, добавляем лук :)
     statement.bind_param('limit', limit) unless limit.nil? # загружаем лимит вместо плейсхолдера, добавляем морковь :)
@@ -168,7 +173,9 @@ class Post
 
     db.results_as_hash = true # настройка соединения к базе, он результаты из базы преобразует в Руби хэши
 
+
     # запрос к базе на вставку новой записи в соответствии с хэшом, сформированным дочерним классом to_db_hash
+    begin
     db.execute(
         "INSERT INTO posts (" +
             to_db_hash.keys.join(',') + # все поля, перечисленные через запятую
@@ -179,6 +186,10 @@ class Post
         to_db_hash.values
     )
 
+    rescue SQLite3::SQLException
+      puts "Не удалось выполнить запрос в базе #{@@SQLITE_DB_FILE}"
+      puts "no such table: posts"
+    end
     insert_row_id = db.last_insert_row_id
     db.close
 
